@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, Alert, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 
 const App = () => {
   const [level, setLevel] = useState(1);
@@ -46,12 +46,16 @@ const App = () => {
     setCanvasText([]);
   };
 
-
   const startGame = (lvl) => {
-    if (lvl > completedLevels + 1) return;
-    setLevel(lvl);
-    setShowLevelSelection(false);
-    setShowGameScreen(true);
+    if ((lvl == 1) || (lvl <= completedLevels + 1)) {
+      setLevel(lvl);
+      setShowLevelSelection(false);
+      setShowGameScreen(true);
+
+    } else {
+      setModalMessage('Level is locked. Complete previous levels.');
+      setIsModalVisible(true);
+    }
   };
 
   const calculate = () => {
@@ -59,11 +63,10 @@ const App = () => {
     let sub = num1 - num2;
     let mul = num1 * num2;
     let dv = num2 !== 0 ? num1 / num2 : 'Cannot divide by zero';
-    let div = Math.floor(dv *100)/100;
+    let div = Math.floor(dv * 100) / 100;
 
     setCanvasText([
       '___Hint___',
-      
       `Addition: ${add}`,
       `Subtraction: ${sub}`,
       `Multiplication: ${mul}`,
@@ -72,14 +75,20 @@ const App = () => {
   };
 
 
+
   const check = () => {
+    // Validate inputs
     if (input1 === '' || input2 === '' || isNaN(input1) || isNaN(input2)) {
       Alert.alert('Error', 'Please enter valid numbers.');
       return;
     }
 
-    let correct1 = parseInt(input1) === num1;
-    let correct2 = parseInt(input2) === num2;
+    // Convert inputs to integers
+    let numInput1 = parseInt(input1);
+    let numInput2 = parseInt(input2);
+
+    let correct1 = numInput1 === num1;
+    let correct2 = numInput2 === num2;
 
     let message = '';
     if (correct1) message += 'First number is correct\n';
@@ -88,28 +97,39 @@ const App = () => {
     if (correct2) message += 'Second number is correct\n';
     else message += 'Second number is wrong!\n';
 
+    // Display result alert and handle the game flow
     Alert.alert('Result', message, [
-      { text: 'OK', onPress: () => {
-      if (correct1 && correct2) {
-        setCompletedLevels(completedLevels + 1);
-        setScore(score + 10);
-        setNotification('Level Completed!');
-        setTimeout(() => {
-        setNotification('');
-        setShowLevelSelection(true);
-        setShowGameScreen(false);
-        }, 500);
-      } else {
-        setNotification(message);
-      }
-      }}
-    ]); 
+      {
+        text: 'OK',
+        onPress: () => {
+          // Update score and level if both answers are correct
+          if (correct1 && correct2) {
+            if (level - 1 == completedLevels) {
+              setCompletedLevels(completedLevels + 1);
+            }
+            setScore(score + 10);
+            setNotification('Level Completed!');
+
+            // Transition to the next screen after a brief delay
+            setTimeout(() => {
+              setNotification('');
+              setShowLevelSelection(true);
+              setShowGameScreen(false);
+            }, 500);
+          } else {
+            // Show the message if either number is incorrect
+            setNotification(message);
+          }
+        },
+      },
+    ]);
   };
+
   const home = () => {
     setShowLevelSelection(false);
     setShowGameScreen(false);
     restartGame();
-  }
+  };
 
   const showResult = () => {
     setCanvasText([
@@ -117,7 +137,7 @@ const App = () => {
       '------------------------------',
       `  First number is: ${num1}   `,
       `  Second number is: ${num2}  `,
-      '------------------------------'
+      '------------------------------',
     ]);
   };
 
@@ -125,19 +145,39 @@ const App = () => {
     <View style={styles.container}>
       {showLevelSelection && (
         <View style={styles.levelSelection}>
-          <TouchableOpacity style={[styles.btn, 1 > completedLevels + 1 && styles.locked]} onPress={() => startGame(1)} disabled={1 > completedLevels + 1}>
+          <TouchableOpacity
+            style={[styles.btn, 1 > completedLevels + 1 && styles.locked]}
+            onPress={() => startGame(1)}
+            disabled={1 > completedLevels + 1}
+          >
             <Text style={styles.btnText}>Level 1</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.btn, 2 > completedLevels + 1 && styles.locked]} onPress={() => startGame(2)} disabled={2 > completedLevels + 1}>
+          <TouchableOpacity
+            style={[styles.btn, 2 > completedLevels + 1 && styles.locked]}
+            onPress={() => startGame(2)}
+            disabled={2 > completedLevels + 1}
+          >
             <Text style={styles.btnText}>Level 2</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.btn, 3 > completedLevels + 1 && styles.locked]} onPress={() => startGame(3)} disabled={3 > completedLevels + 1}>
+          <TouchableOpacity
+            style={[styles.btn, 3 > completedLevels + 1 && styles.locked]}
+            onPress={() => startGame(3)}
+            disabled={3 > completedLevels + 1}
+          >
             <Text style={styles.btnText}>Level 3</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.btn, 4 > completedLevels + 1 && styles.locked]} onPress={() => startGame(4)} disabled={4 > completedLevels + 1}>
+          <TouchableOpacity
+            style={[styles.btn, 4 > completedLevels + 1 && styles.locked]}
+            onPress={() => startGame(4)}
+            disabled={4 > completedLevels + 1}
+          >
             <Text style={styles.btnText}>Level 4</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.btn, 5 > completedLevels + 1 && styles.locked]} onPress={() => startGame(5)} disabled={5 > completedLevels + 1}>
+          <TouchableOpacity
+            style={[styles.btn, 5 > completedLevels + 1 && styles.locked]}
+            onPress={() => startGame(5)}
+            disabled={5 > completedLevels + 1}
+          >
             <Text style={styles.btnText}>Level 5</Text>
           </TouchableOpacity>
         </View>
@@ -145,7 +185,7 @@ const App = () => {
 
       {!showLevelSelection && !showGameScreen && (
         <View>
-          <Text style={styles.title}>Guess the number</Text> 
+          <Text style={styles.title}>Guess the number</Text>
           <TouchableOpacity style={styles.playbtn} onPress={() => setShowLevelSelection(true)}>
             <Text style={styles.btnplay}>Play</Text>
           </TouchableOpacity>
@@ -170,8 +210,20 @@ const App = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.inputContainer}>
-            <TextInput style={styles.input} placeholder="1st No" keyboardType="numeric" value={input1} onChangeText={setInput1} />
-            <TextInput style={styles.input} placeholder="2nd No" keyboardType="numeric" value={input2} onChangeText={setInput2} />
+            <TextInput
+              style={styles.input}
+              placeholder="1st No"
+              keyboardType="numeric"
+              value={input1}
+              onChangeText={setInput1}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="2nd No"
+              keyboardType="numeric"
+              value={input2}
+              onChangeText={setInput2}
+            />
           </View>
           <View style={styles.checkContainer}>
             <TouchableOpacity style={styles.btncheck} onPress={check}>
@@ -179,7 +231,9 @@ const App = () => {
             </TouchableOpacity>
             <View style={styles.canvas}>
               {canvasText.map((text, index) => (
-                <Text style={styles.canvastext} key={index}>{text}</Text>
+                <Text style={styles.canvastext} key={index}>
+                  {text}
+                </Text>
               ))}
             </View>
             <TouchableOpacity style={styles.btncheck} onPress={showResult}>
@@ -189,9 +243,7 @@ const App = () => {
         </View>
       )}
 
-      {notification !== '' &&
-        <Text style={styles.notification}>{notification}</Text>
-      }
+      {notification !== '' && <Text style={styles.notification}>{notification}</Text>}
     </View>
   );
 };
@@ -210,7 +262,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     bottom: 30,
     textAlign: 'center',
-
   },
   scoreboard: {
     fontSize: 26,
@@ -222,16 +273,14 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'column',
-    //marginBottom: 20,
     bottom: 50,
   },
-
   btn: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgb(0, 95, 0)',
     padding: 10,
-    margin: 5,  
+    margin: 5,
     borderRadius: 7,
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 2 },
@@ -243,14 +292,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgb(245, 6, 38)',
     padding: 20,
-    margin: 5,  
+    margin: 5,
     borderRadius: 100,
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.9,
     shadowRadius: 8,
     marginHorizontal: 70,
-    cursor: 'auto', 
+    cursor: 'auto',
   },
   btnplay: {
     color: 'rgb(248, 252, 250)',
@@ -258,21 +307,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginLeft: 20,
   },
-
   btnhome: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'blue',
     padding: 10,
-    margin: 5,  
+    margin: 5,
     borderRadius: 7,
     shadowColor: '#000',
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.5,
     shadowRadius: 2,
   },
-
-
   btncheck: {
     backgroundColor: 'rgb(218, 73, 7)',
     padding: 10,
@@ -295,14 +341,12 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     marginHorizontal: 40,
   },
-
   btnText: {
     color: 'rgb(248, 252, 250)',
     fontSize: 20,
     textAlign: 'center',
     marginLeft: 5,
   },
-  
   locked: {
     backgroundColor: 'grey',
   },
@@ -324,19 +368,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'rgb(172, 172, 172)',
     fontSize: 20,
-    fontWeight:'bold',
+    fontWeight: 'bold',
     padding: 5,
     margin: 5,
     marginHorizontal: 10,
     color: 'black',
-
   },
   notification: {
     fontSize: 30,
     color: 'brown',
     fontWeight: 'bold',
     textAlign: 'center',
-
   },
   levelSelection: {
     marginTop: 20,
@@ -346,7 +388,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: 350,
     height: 200,
-    fontFamily: "bold",
+    fontFamily: 'bold',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fdd5b1',
@@ -365,15 +407,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     bottom: 30,
   },
-  Alert: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    bottom: 90,
-    alignItems: 'center',
-    backgroundColor: 'rgb(90, 170, 166)',
-  },
-
 });
 
 export default App;
